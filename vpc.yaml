@@ -28,6 +28,13 @@ Resources:
       Tags:
       - Key: Name
         Value: !Sub ${AWS::StackName}-public
+  RouteTablePublicRoute:
+    Type: AWS::EC2::Route
+    DependsOn: InternetGatewayAttachment
+    Properties:
+      GatewayId: !Ref InternetGateway
+      RouteTableId: !Ref RouteTablePublic
+      DestinationCidrBlock: 0.0.0.0/0
   RouteTablePublicAssociationPublicA:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
