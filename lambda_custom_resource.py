@@ -1,5 +1,6 @@
 import ipaddress
 import math
+import boto3
 
 
 def split_cidr(cidr, num_networks):
@@ -33,4 +34,47 @@ def split_cidr(cidr, num_networks):
         print("Error:", e)
 
 
-print(split_cidr("10.0.0.0/16", 5))
+def lambda_handler(event, context):
+    """
+    Lambda handler function.
+
+    :param event: AWS Lambda event
+    :param context: AWS Lambda context
+    :return: None
+    """
+    print("Received event:", event)
+
+    cidr = event["ResourceProperties"]["CidrBlock"]
+    vpc = event["ResourceProperties"]["VpcId"]
+    ec2 = boto3.client("ec2", region_name=region_name)
+    response = ec2.describe_availability_zones()
+
+    num_networks = len(response["AvailabilityZones"])
+
+    subnets_cidrs = split_cidr(cidr, num_networks)
+    subnet = []
+    for az in response["AvailabilityZones"]:
+        subnet = ec2.create_subnet(
+            CidrBlock=subnets_cidrs.pop(), VpcId=vpc, AvailabilityZone=az["ZoneName"]
+        )
+        subnets.append(subnet["Subnet"]["SubnetId"])
+        print("Created subnet:", subnet)
+
+    # Split the CIDR block into the specified number of subnets
+
+    ec2 = boto3.client("ec2", region_name=region_name)
+    response = ec2.describe_availability_zones()
+
+    # Return the subnets in the response
+    response_data = {"Subnets": subnets}
+    response = {
+        "Status": "SUCCESS",
+        "PhysicalResourceId": context.log_stream_name,
+        "StackId": event["StackId"],
+        "RequestId": event["RequestId"],
+        "LogicalResourceId": event["LogicalResourceId"],
+        "Data": response_data,
+    }
+
+    print("Returning response:", response)
+    return response
