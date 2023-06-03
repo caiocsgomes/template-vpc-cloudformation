@@ -10,6 +10,7 @@ Resources:
       CidrBlock: !Ref VpcCidr
       EnableDnsSupport: true
       EnableDnsHostnames: true
+  ## Internet Gateway
   InternetGateway:
     Type: AWS::EC2::InternetGateway
     Properties:
@@ -21,6 +22,7 @@ Resources:
     Properties:
       VpcId: !Ref VPC
       InternetGatewayId: !Ref InternetGateway
+  ## Public Route Table
   RouteTablePublic:
     Type: AWS::EC2::RouteTable
     Properties:
@@ -35,21 +37,7 @@ Resources:
       GatewayId: !Ref InternetGateway
       RouteTableId: !Ref RouteTablePublic
       DestinationCidrBlock: 0.0.0.0/0
-  RouteTablePublicAssociationPublicA:
-    Type: AWS::EC2::SubnetRouteTableAssociation
-    Properties:
-      SubnetId: !Ref SubnetPublicA
-      RouteTableId: !Ref RouteTablePublic
-  RouteTablePublicAssociationPublicB:
-    Type: AWS::EC2::SubnetRouteTableAssociation
-    Properties:
-      SubnetId: !Ref SubnetPublicB
-      RouteTableId: !Ref RouteTablePublic
-  RouteTablePublicAssociationPublicC:
-    Type: AWS::EC2::SubnetRouteTableAssociation
-    Properties:
-      SubnetId: !Ref SubnetPublicC
-      RouteTableId: !Ref RouteTablePublic
+  ## Public Subnets
   SubnetPublicA:
     Type: AWS::EC2::Subnet
     Properties:
@@ -80,3 +68,50 @@ Resources:
       Tags:
       - Key: Name
         Value: !Sub ${AWS::StackName}-public-c
+  ## Public Subnet Route Table Associations
+  RouteTablePublicAssociationPublicA:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref SubnetPublicA
+      RouteTableId: !Ref RouteTablePublic
+  RouteTablePublicAssociationPublicB:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref SubnetPublicB
+      RouteTableId: !Ref RouteTablePublic
+  RouteTablePublicAssociationPublicC:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref SubnetPublicC
+      RouteTableId: !Ref RouteTablePublic
+  ## Private subnets
+  SubnetPrivateA:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: 10.0.48.0/20
+      AvailabilityZone: !Select [ 0, !GetAZs ]
+      MapPublicIpOnLaunch: false
+      Tags:
+      - Key: Name
+        Value: !Sub ${AWS::StackName}-private-a
+  SubnetPrivateB:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: 10.0.64.0/20
+      AvailabilityZone: !Select [ 1, !GetAZs ]
+      MapPublicIpOnLaunch: false
+      Tags:
+      - Key: Name
+        Value: !Sub ${AWS::StackName}-private-b
+  SubnetPrivateC:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: 10.0.80.0/20 
+      AvailabilityZone: !Select [ 2, !GetAZs ]
+      MapPublicIpOnLaunch: false
+      Tags:
+      - Key: Name
+        Value: !Sub ${AWS::StackName}-private-c
