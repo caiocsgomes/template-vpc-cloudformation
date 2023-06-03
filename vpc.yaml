@@ -1,13 +1,8 @@
-Parameters:
-  VpcCidr:
-    Type: String
-    Default: 10.0.0.0/16
-    Description: CIDR block for the VPC
 Resources:
   VPC:
     Type: AWS::EC2::VPC
     Properties:
-      CidrBlock: !Ref VpcCidr
+      CidrBlock: 10.0.0.0/16
       EnableDnsSupport: true
       EnableDnsHostnames: true
   ## Internet Gateway
@@ -115,3 +110,95 @@ Resources:
       Tags:
       - Key: Name
         Value: !Sub ${AWS::StackName}-private-c
+  ## Nat Gateways, 1 per AZ for HA
+  NatGatewayAElasticIP:
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
+  NatGatewayA:
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId: !GetAtt NatGatewayAElasticIP.AllocationId
+      SubnetId: !Ref SubnetPublicA
+      Tags:
+      - Key: Name
+        Value: !Sub ${AWS::StackName}-nat-a
+  NatGatewayBElasticIP:
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
+  NatGatewayB:
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId: !GetAtt NatGatewayBElasticIP.AllocationId
+      SubnetId: !Ref SubnetPublicB
+      Tags:
+      - Key: Name
+        Value: !Sub ${AWS::StackName}-nat-b
+  NatGatewayCElasticIP:
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
+  NatGatewayC:
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId: !GetAtt NatGatewayCElasticIP.AllocationId
+      SubnetId: !Ref SubnetPublicC
+      Tags:
+      - Key: Name
+        Value: !Sub ${AWS::StackName}-nat-c
+  ## Private Route Tables
+  RouteTablePrivateA:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+      - Key: Name
+        Value: !Sub ${AWS::StackName}-private-a
+  RouteTablePrivateARoute:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref RouteTablePrivateA
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref NatGatewayA
+  RouteTablePrivateAssociationPrivateA:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref SubnetPrivateA
+      RouteTableId: !Ref RouteTablePrivateA
+  RouteTablePrivateB:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+      - Key: Name
+        Value: !Sub ${AWS::StackName}-private-b
+  RouteTablePrivateBRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref RouteTablePrivateB
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref NatGatewayB
+  RouteTablePrivateAssociationPrivateB:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref SubnetPrivateB
+      RouteTableId: !Ref RouteTablePrivateB
+  RouteTablePrivateC:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+      - Key: Name
+        Value: !Sub ${AWS::StackName}-private-c
+  RouteTablePrivateCRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref RouteTablePrivateC
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref NatGatewayC
+  RouteTablePrivateAssociationPrivateC:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref SubnetPrivateC
+      RouteTableId: !Ref RouteTablePrivateC
