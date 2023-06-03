@@ -202,3 +202,27 @@ Resources:
     Properties:
       SubnetId: !Ref SubnetPrivateC
       RouteTableId: !Ref RouteTablePrivateC
+
+
+Outputs:
+  VPC:
+    Description: VPC ID
+    Value: !Ref VPC
+  SubnetPublicA:
+    Description: Public Subnet A
+    Value: !Ref SubnetPublicA
+  SubnetPublicB:
+    Description: Public Subnet B
+    Value: !Ref SubnetPublicB
+  SubnetPublicC:
+    Description: Public Subnet C
+    Value: !Ref SubnetPublicC
+  SubnetPrivateA:
+    Description: Private Subnet A
+    Value: !Ref SubnetPrivateA
+  SubnetPrivateB:
+    Description: Private Subnet B
+    Value: !Ref SubnetPrivateB
+  SubnetPrivateC:
+    Description: Private Subnet C
+    Value: !Ref SubnetPrivateC

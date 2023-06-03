@@ -23,7 +23,7 @@ aws cloudformation describe-stack-events --stack-name vpc
 
 Delete the stack:
 ```bash
-aws cloudformation wait stack-delete-complete --stack-name MyStack
+aws cloudformation wait stack-delete-complete --stack-name vpc
 ```
 
 ## References
